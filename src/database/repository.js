@@ -12,6 +12,15 @@ function findCurrentClassId() {
     return database.classes.length + 1
 }
 
+function updateClass(classId, updatedClass) {
+    const index = classId - 1;
+    database.classes[index] = updatedClass;
+}
+
+function pushNewClass(newClass) {
+    database.classes.push(newClass)
+}
+
 function findAllTeachers() {
     return database.teachers
 }
@@ -24,6 +33,8 @@ module.exports = {
     findAllClasses,
     findClassById,
     findCurrentClassId,
+    updateClass,
+    pushNewClass,
     findAllTeachers,
     findTeacherById,
 }
