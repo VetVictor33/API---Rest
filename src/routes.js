@@ -1,6 +1,6 @@
 const express = require('express');
-const { getAllClasses, getClassById, putClass, deleteClass, patchClass, checkClassIdMiddleware } = require('./controllers/classes.controllers');
-const { getTeachersAllClasses, postNewClass, getAllTeachers, getTeacherById, checkTeachrsdMiddleware } = require('./controllers/teachers.controllers');
+const { getAllClasses, getClassById, putClass, deleteClass, patchClass, checkClassIdMiddleware, getAllTeachersClasses, postNewClass } = require('./controllers/classes.controllers');
+const { getAllTeachers, getTeacherById, checkTeachrsdMiddleware } = require('./controllers/teachers.controllers');
 const routes = express();
 
 
@@ -14,7 +14,7 @@ routes.delete('/classes/:classeId', checkClassIdMiddleware, deleteClass);
 
 routes.get('/teachers', getAllTeachers);
 routes.get('/teachers/:teachersId', checkTeachrsdMiddleware, getTeacherById)
-routes.get('/teachers/:teachersId/classes', checkTeachrsdMiddleware, getTeachersAllClasses);
+routes.get('/teachers/:teachersId/classes', checkTeachrsdMiddleware, getAllTeachersClasses);
 routes.post('/teachers/:teachersId/classes', checkTeachrsdMiddleware, postNewClass);
 
 
