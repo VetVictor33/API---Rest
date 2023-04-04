@@ -53,7 +53,7 @@ const deleteClass = (req, res) => {
 
 const getAllTeachersClasses = (req, res) => {
     const { teachersId } = req.params;
-    const teachersClasses = findAllClasses().filter(classe => classe.teachers.indexOf(+teachersId) !== -1);
+    const teachersClasses = findAllClasses().filter(classe => classe.teachers_id.indexOf(+teachersId) !== -1);
 
     if (!teachersClasses) {
         return res.status(404).json({ message: 'Nenhuma aula encontrada com este professor' });
