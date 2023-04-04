@@ -9,12 +9,19 @@ function findClassById(id) {
 }
 
 function findCurrentClassId() {
-    return database.classes.length + 1
+    const lastElemntIndex = database.classes.slice(-1)[0].id;
+    return lastElemntIndex + 1;
+
 }
 
 function updateClass(classId, updatedClass) {
     const index = classId - 1;
     database.classes[index] = updatedClass;
+}
+
+function removeClass(classeId) {
+    const updatedDb = database.classes.filter(classe => classe.id !== +classeId);
+    database.classes = updatedDb;
 }
 
 function pushNewClass(newClass) {
@@ -34,6 +41,7 @@ module.exports = {
     findClassById,
     findCurrentClassId,
     updateClass,
+    removeClass,
     pushNewClass,
     findAllTeachers,
     findTeacherById,

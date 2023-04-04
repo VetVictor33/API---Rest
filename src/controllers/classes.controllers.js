@@ -1,4 +1,4 @@
-const { findClassById, findAllClasses, updateClass } = require("../database/repository");
+const { findClassById, findAllClasses, updateClass, removeClass } = require("../database/repository");
 
 
 const getAllClasses = (req, res) => {
@@ -34,8 +34,20 @@ const patchClass = (req, res) => {
     return res.status(204).send()
 }
 
+const deleteClass = (req, res) => {
+    const { classeId } = req.params;
+
+    if (!findClassById(+classeId)) {
+        return res.status(404).json({ message: 'There is no such class' })
+    }
+
+    removeClass(+classeId);
+    return res.status(204).send();
+}
+
 module.exports = {
     getAllClasses,
     getClassById,
-    patchClass
+    patchClass,
+    deleteClass
 }
