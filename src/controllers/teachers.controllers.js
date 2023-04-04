@@ -1,5 +1,13 @@
 const { findCurrentClassId, findTeacherById, pushNewClass, findAllClasses, findAllTeachers } = require("../database/repository");
 
+const checkTeachrsdMiddleware = (req, res, next) => {
+    const { teachersId } = req.params
+    if (!findTeacherById(+teachersId)) {
+        return res.status(404).json({ message: "There is no such teacher" })
+    }
+    return next()
+}
+
 const getAllTeachers = (req, res) => {
     const teachers = findAllTeachers();
     res.status(200).json(teachers);
@@ -8,19 +16,11 @@ const getAllTeachers = (req, res) => {
 const getTeacherById = (req, res) => {
     const { teachersId } = req.params
     const teacher = findTeacherById(+teachersId);
-    if (!teacher) {
-        return res.status(404).json({ message: "There is no such teacher" })
-    }
-    return res.status(200).json(teacher)
+    return res.status(200).json(teacher);
 }
 
 const getTeachersAllClasses = (req, res) => {
     const { teachersId } = req.params;
-    const teacher = findTeacherById(+teachersId);
-    if (!teacher) {
-        return res.status(404).json({ message: 'There is not such teacher' })
-    }
-
     const teachersClasses = findAllClasses().filter(classe => classe.teachers.indexOf(+teachersId) !== -1);
 
     if (!teachersClasses) {
@@ -34,13 +34,9 @@ const getTeachersAllClasses = (req, res) => {
 const postNewClass = (req, res) => {
     const { teachersId } = req.params;
     const { name, description } = req.body;
-    const teacher = findTeacherById(+teachersId);
 
     if (!name || !description) {
         return res.status(400).json({ message: 'Class need to have at least a name and description' })
-    }
-    if (!teacher) {
-        return res.status(404).json({ message: 'There is not such teacher' })
     }
 
     const newClassId = findCurrentClassId();
@@ -52,6 +48,7 @@ const postNewClass = (req, res) => {
 }
 
 module.exports = {
+    checkTeachrsdMiddleware,
     getAllTeachers,
     getTeacherById,
     getTeachersAllClasses,
