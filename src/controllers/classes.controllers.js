@@ -1,4 +1,4 @@
-const { findClassById, findAllClasses, updateClass, removeClass, updateClassNameOrDescription, pushNewClass, findTeacherById, findCurrentClassId } = require("../database/repository");
+const { findClassById, findAllClasses, updateClass, removeClass, updateClassNameOrDescriptionOrTeachers, pushNewClass, findTeacherById, findCurrentClassId, findAllTeachersClass } = require("../database/repository");
 
 
 const checkClassIdMiddleware = (req, res, next) => {
@@ -23,26 +23,49 @@ const getClassById = (req, res) => {
 
 const putClass = (req, res) => {
     const { classeId } = req.params;
-    const { name, description } = req.body;
-    if (!name || !description) {
-        return res.status(400).json({ message: 'To update the class you need to informa new name and description' })
+    const { name, description, teachers_ids } = req.body;
+    if (!name || !description || !teachers_ids) {
+        return res.status(400).json({ message: 'To update the class you need to informa new name, description and new teachers_ids array' })
+    }
+    const validation = validadeTeachersIdArray(teachers_ids);
+    if (!validation[0]) {
+        return res.status(400).json(validation[1])
     }
 
-    const updatedClass = { id: +classeId, name, description };
+    const updatedClass = { id: +classeId, name, description, teachers_ids };
 
     updateClass(classeId, updatedClass);
 
     return res.status(204).send()
 }
 
-const patchClass = (req, res) => {
+const patchClassName = (req, res) => {
     const { classeId } = req.params;
-    const { name, description } = req.body;
-    if (!name && !description || name && description) {
-        return res.status(400).json({ message: 'You need to inform at at least one and only one: name or description' })
+    const { name } = req.body;
+    if (!name) {
+        return res.status(400).json({ message: 'Please, choose a new name for this class!' })
     }
-    updateClassNameOrDescription(classeId, name, description);
+    updateClassNameOrDescriptionOrTeachers(classeId, name);
     res.status(204).send();
+}
+const patchClassDescription = (req, res) => {
+    const { classeId } = req.params;
+    const { description } = req.body;
+    if (!description) {
+        return res.status(400).json({ message: 'Please, choose a new description for this class!' })
+    }
+    updateClassNameOrDescriptionOrTeachers(classeId, undefined, description);
+    res.status(204).send();
+}
+const patchClassTeachers = (req, res) => {
+    const { classeId } = req.params;
+    const { teachers_ids } = req.body;
+    const validation = validadeTeachersIdArray(teachers_ids);
+    if (!validation[0]) {
+        return res.status(400).json(validation[1]);
+    }
+    updateClassNameOrDescriptionOrTeachers(classeId, undefined, undefined, teachers_ids);
+    return res.status(204).send();
 }
 
 const deleteClass = (req, res) => {
@@ -53,13 +76,13 @@ const deleteClass = (req, res) => {
 
 const getAllTeachersClasses = (req, res) => {
     const { teachersId } = req.params;
-    const teachersClasses = findAllClasses().filter(classe => classe.teachers_id.indexOf(+teachersId) !== -1);
-
-    if (!teachersClasses) {
-        return res.status(404).json({ message: 'Nenhuma aula encontrada com este professor' });
-    }
+    const teachersClasses = findAllTeachersClass(teachersId)
 
     const teachersName = findTeacherById(+teachersId).name
+    if (teachersClasses.length === 0) {
+        return res.status(404).json({ message: `Nenhuma aula encontrada com ${teachersName}` });
+    }
+
     return res.status(200).json({ teachersName, teachersClasses })
 }
 
@@ -79,11 +102,25 @@ const postNewClass = (req, res) => {
     return res.status(201).send()
 }
 
+function validadeTeachersIdArray(teachers_ids) {
+    if (!teachers_ids || !Array.isArray(teachers_ids)) {
+        return [false, { message: 'Please, you need to fill new teachers_ids and it needs to be an Array!' }]
+    }
+    for (const teacher_id of teachers_ids) {
+        if (!findTeacherById(+teacher_id) || isNaN(+teacher_id)) {
+            return [false, { message: `There is no teacher if id ${teacher_id}` }]
+        }
+    }
+    return [true]
+}
+
 module.exports = {
     getAllClasses,
     getClassById,
     putClass,
-    patchClass,
+    patchClassName,
+    patchClassDescription,
+    patchClassTeachers,
     deleteClass,
     checkClassIdMiddleware,
     getAllTeachersClasses,

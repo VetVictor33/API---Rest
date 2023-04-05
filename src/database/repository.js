@@ -18,12 +18,16 @@ function updateClass(classeId, updatedClass) {
     const index = classeId - 1;
     database.classes[index] = updatedClass;
 }
-function updateClassNameOrDescription(classeId, newName, newDescription) {
+function updateClassNameOrDescriptionOrTeachers(classeId, newName, newDescription, newTeachers) {
     const index = classeId - 1;
     if (newName) {
         database.classes[index].name = newName;
     } else if (newDescription) {
         database.classes[index].description = newDescription;
+    } else if (newTeachers) {
+        const teachersIds = [];
+        newTeachers.forEach(teachers => teachersIds.push(+teachers));
+        database.classes[index].teachers_ids = teachersIds;
     }
 }
 
@@ -44,14 +48,21 @@ function findTeacherById(id) {
     return database.teachers.find((teacher) => teacher.id === +id);
 }
 
+function findAllTeachersClass(teachersId) {
+    const classes = findAllClasses();
+    const teachersClasses = classes.filter(classe => classe.teachers_ids.indexOf(+teachersId) !== -1);
+    return teachersClasses
+}
+
 module.exports = {
     findAllClasses,
     findClassById,
     findCurrentClassId,
     updateClass,
-    updateClassNameOrDescription,
+    updateClassNameOrDescriptionOrTeachers,
     removeClass,
     pushNewClass,
     findAllTeachers,
     findTeacherById,
+    findAllTeachersClass
 }
