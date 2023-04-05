@@ -29,7 +29,7 @@ const putClass = (req, res) => {
     }
     const validation = validadeTeachersIdArray(teachers_ids);
     if (!validation[0]) {
-        return res.status(400).json(validation[1])
+        return res.status(validation[1]).json(validation[2])
     }
 
     const updatedClass = { id: +classeId, name, description, teachers_ids };
@@ -62,7 +62,7 @@ const patchClassTeachers = (req, res) => {
     const { teachers_ids } = req.body;
     const validation = validadeTeachersIdArray(teachers_ids);
     if (!validation[0]) {
-        return res.status(400).json(validation[1]);
+        return res.status(validation[1]).json(validation[2]);
     }
     updateClassNameOrDescriptionOrTeachers(classeId, undefined, undefined, teachers_ids);
     return res.status(204).send();
@@ -96,7 +96,7 @@ const postNewClass = (req, res) => {
 
     const newClassId = findCurrentClassId();
 
-    const newClass = { id: newClassId, name, description, teachers: [+teachersId] };
+    const newClass = { id: newClassId, name, description, teachers_ids: [+teachersId] };
 
     pushNewClass(newClass);
     return res.status(201).send()
@@ -104,11 +104,11 @@ const postNewClass = (req, res) => {
 
 function validadeTeachersIdArray(teachers_ids) {
     if (!teachers_ids || !Array.isArray(teachers_ids)) {
-        return [false, { message: 'Please, you need to fill new teachers_ids and it needs to be an Array!' }]
+        return [false, 400, { message: 'Please, you need to fill new teachers_ids and it needs to be an Array!' }]
     }
     for (const teacher_id of teachers_ids) {
         if (!findTeacherById(+teacher_id) || isNaN(+teacher_id)) {
-            return [false, { message: `There is no teacher if id ${teacher_id}` }]
+            return [false, 404, { message: `There is no teacher with id ${teacher_id}` }]
         }
     }
     return [true]
